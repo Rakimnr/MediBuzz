@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.MediBuzz" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Colors from the original Theme.MediBuzz (MaterialComponents) -->
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorPrimaryVariant">@color/primary_blue_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/accent_green</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor">@color/primary_blue</item>
+        <item name="android:windowBackground">@color/background</item>
+
+        <!-- Other theme attributes can be added here as needed for Material 3 -->
+    </style>
+
+    <style name="MediBuzz.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="backgroundTint">@color/primary_blue</item>
+    </style>
+
+    <style name="MediBuzz.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="strokeColor">@color/primary_blue</item>
+        <item name="android:textColor">@color/primary_blue</item>
+    </style>
+
+    <style name="MediBuzz.Button.Green" parent="Widget.MaterialComponents.Button">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="backgroundTint">@color/accent_green</item>
+    </style>
+
+    <style name="MediBuzz.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/card_background</item>
+    </style>
+
+    <style name="MediBuzz.StatusBadge">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+
+    <!-- Optional: If you have a specific variant for NoActionBar, it should inherit from Theme.MediBuzz -->
+    <style name="MediBuzz.NoActionBar" parent="Theme.MediBuzz">
+        <!-- No specific items needed if it's just a direct inheritance -->
+    </style>
+
+    <!-- Define the "MediBuzz" style required by your project. -->
+    <!-- This likely acts as an alias or the primary theme your AndroidManifest.xml refers to. -->
+    <style name="MediBuzz" parent="Theme.MediBuzz" />
+
+    <!-- You might have other theme definitions as well, for specific screens or variants -->
+    <style name="Theme.MediBuzz.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+</resources>

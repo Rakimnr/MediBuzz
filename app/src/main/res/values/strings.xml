@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MediBuzz</string>
+    <string name="slogan">A gentle buzz for every dose.</string>
+
+    <!-- Welcome -->
+    <string name="get_started">Get Started</string>
+
+    <!-- Main -->
+    <string name="today">Today</string>
+    <string name="add_medicine">Add Medicine</string>
+    <string name="history">History</string>
+    <string name="empty_today">No medicines scheduled for today.\nTap Add Medicine to get started.</string>
+
+    <!-- Add Medicine -->
+    <string name="add_medicine_title">Add Medicine</string>
+    <string name="medicine_name">Medicine name</string>
+    <string name="dose_note">Dose note (e.g. 1 tablet)</string>
+    <string name="pick_time">Pick time</string>
+    <string name="pick_start_date">Start date</string>
+    <string name="schedule_type">Schedule type</string>
+    <string name="schedule_daily">Daily</string>
+    <string name="schedule_every_other_day">Every other day</string>
+    <string name="save">Save</string>
+    <string name="error_name_required">Please enter a medicine name</string>
+    <string name="medicine_saved">Medicine saved!</string>
+    <string name="no_dose_note">No note</string>
+
+    <!-- History -->
+    <string name="history_title">Reminder History</string>
+    <string name="empty_history">No reminder history yet.</string>
+    <string name="history_scheduled">Scheduled: %1$s</string>
+    <string name="history_confirmed">Confirmed: %1$s</string>
+    <string name="missed_dose_advice">Please follow the doctor\'s or medicine label instructions for missed doses.</string>
+
+    <!-- Status badges -->
+    <string name="status_taken">TAKEN</string>
+    <string name="status_snoozed">SNOOZED</string>
+    <string name="status_skipped">SKIPPED</string>
+    <string name="status_missed">MISSED</string>
+    <string name="status_pending">PENDING</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">Time for %1$s</string>
+    <string name="notification_body">Tap to open MediBuzz and confirm your dose.</string>
+    <string name="action_taken">Taken</string>
+    <string name="action_snooze">Snooze 10 min</string>
+    <string name="action_skipped">Skipped</string>
+</resources>

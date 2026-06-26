@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "com.medibuzz.app-mergeDebugResources-37:/layout/activity_welcome.xml",
+        "source": "com.medibuzz.app-main-40:/layout/activity_welcome.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-mergeDebugResources-37:/layout/activity_main.xml",
+        "source": "com.medibuzz.app-main-40:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-mergeDebugResources-37:/layout/item_medicine_card.xml",
+        "source": "com.medibuzz.app-main-40:/layout/item_medicine_card.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-mergeDebugResources-37:/layout/item_history_card.xml",
+        "source": "com.medibuzz.app-main-40:/layout/item_history_card.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-mergeDebugResources-37:/layout/activity_add_medicine.xml",
+        "source": "com.medibuzz.app-main-40:/layout/activity_add_medicine.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-mergeDebugResources-37:/layout/activity_history.xml",
+        "source": "com.medibuzz.app-main-40:/layout/activity_history.xml"
+    }
+]

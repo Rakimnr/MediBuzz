@@ -1,0 +1,46 @@
+[
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/layout_activity_main.xml.flat",
+        "source": "com.medibuzz.app-main-40:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.medibuzz.app-main-40:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/layout_activity_add_medicine.xml.flat",
+        "source": "com.medibuzz.app-main-40:/layout/activity_add_medicine.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/layout_item_history_card.xml.flat",
+        "source": "com.medibuzz.app-main-40:/layout/item_history_card.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/drawable_ic_medicine.xml.flat",
+        "source": "com.medibuzz.app-main-40:/drawable/ic_medicine.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/layout_item_medicine_card.xml.flat",
+        "source": "com.medibuzz.app-main-40:/layout/item_medicine_card.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/drawable_ic_notification.xml.flat",
+        "source": "com.medibuzz.app-main-40:/drawable/ic_notification.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/layout_activity_history.xml.flat",
+        "source": "com.medibuzz.app-main-40:/layout/activity_history.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/layout_activity_welcome.xml.flat",
+        "source": "com.medibuzz.app-main-40:/layout/activity_welcome.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.medibuzz.app-main-40:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.medibuzz.app-merged_res-38:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.medibuzz.app-main-40:/drawable/ic_launcher_foreground.xml"
+    }
+]
