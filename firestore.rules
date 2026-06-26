@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users: read/write own profile only
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow authenticated users to query by partnerCode (connection flow)
+      allow list: if request.auth != null;
+    }
+
+    // Partner links: document ID = medicineUserId
+    match /partner_links/{medicineUserId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == medicineUserId ||
+        request.auth.uid == resource.data.carePartnerId
+      );
+      allow create: if request.auth != null &&
+        request.resource.data.carePartnerId == request.auth.uid &&
+        request.resource.data.medicineUserId == medicineUserId;
+      allow update, delete: if request.auth != null &&
+        request.auth.uid == medicineUserId;
+    }
+
+    // Shared status: medicine user writes; care partner reads only when sharing enabled
+    match /shared_status/{statusId} {
+      allow read: if request.auth != null && (
+        resource.data.medicineUserId == request.auth.uid ||
+        (resource.data.carePartnerId == request.auth.uid &&
+         isSharingEnabled(resource.data.medicineUserId))
+      );
+      allow create, update: if request.auth != null &&
+        request.resource.data.medicineUserId == request.auth.uid &&
+        isSharingEnabled(request.resource.data.medicineUserId);
+      allow delete: if request.auth != null &&
+        resource.data.medicineUserId == request.auth.uid;
+    }
+
+    function isSharingEnabled(medicineUserId) {
+      let link = get(/databases/$(database)/documents/partner_links/$(medicineUserId));
+      return link != null && link.data.sharingEnabled == true;
+    }
+  }
+}

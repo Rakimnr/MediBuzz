@@ -19,8 +19,8 @@
     <!-- Status colors -->
     <color name="status_taken">#2E7D4F</color>
     <color name="status_taken_bg">#E8F5EC</color>
-    <color name="status_snoozed">#5B7EC4</color>
-    <color name="status_snoozed_bg">#E8F0FA</color>
+    <color name="status_snoozed">#E67E22</color>
+    <color name="status_snoozed_bg">#FDF0E4</color>
     <color name="status_skipped">#8B6B4A</color>
     <color name="status_skipped_bg">#F5EDE3</color>
     <color name="status_missed">#B85C5C</color>

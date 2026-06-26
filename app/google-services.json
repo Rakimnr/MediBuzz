@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "735486489218",
+    "project_id": "medibuzz-468ad",
+    "storage_bucket": "medibuzz-468ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735486489218:android:03dc726702ad1196667a9b",
+        "android_client_info": {
+          "package_name": "com.medibuzz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8caksjXyJf-LgyZ_27K5q3686rFE7sfI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

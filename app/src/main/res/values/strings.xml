@@ -6,11 +6,80 @@
     <!-- Welcome -->
     <string name="get_started">Get Started</string>
 
+    <!-- Auth -->
+    <string name="login">Log In</string>
+    <string name="register">Register</string>
+    <string name="create_account">Create Account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="display_name">Display name</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="continue_offline">Continue without account</string>
+    <string name="error_login_fields">Please enter email and password</string>
+    <string name="error_login_failed">Login failed</string>
+    <string name="error_register_fields">Please fill in all fields</string>
+    <string name="error_register_failed">Registration failed</string>
+    <string name="error_password_length">Password must be at least 6 characters</string>
+    <string name="error_profile">Profile not found</string>
+    <string name="logged_out">Logged out</string>
+
+    <!-- Role selection -->
+    <string name="choose_role_title">Choose your role</string>
+    <string name="choose_role_subtitle">How will you use MediBuzz?</string>
+    <string name="role_medicine_user">Medicine User</string>
+    <string name="role_medicine_user_desc">I take medicine and want reminders</string>
+    <string name="role_care_partner">Care Partner</string>
+    <string name="role_care_partner_desc">I want to see a loved one\'s medicine status</string>
+    <string name="confirm_role">Confirm Role</string>
+
+    <!-- Partner -->
+    <string name="partner_connect_title">Partner Connection</string>
+    <string name="my_partner_code">My Partner Code</string>
+    <string name="share_code_hint">Share this code with your care partner so they can connect.</string>
+    <string name="enter_partner_code">Enter partner code</string>
+    <string name="connect_partner">Connect Partner</string>
+    <string name="continue_to_app">Continue to App</string>
+    <string name="partner_connected">Partner connected!</string>
+    <string name="error_partner_code">Please enter a partner code</string>
+    <string name="error_connect_failed">Connection failed</string>
+    <string name="privacy_sharing_note">Your medicine status will only be shared with your selected care partner when sharing is enabled.</string>
+    <string name="partner">Partner</string>
+    <string name="partner_dashboard_title">Partner Dashboard</string>
+    <string name="partner_not_connected">No partner connected yet. Enter a partner code to connect.</string>
+    <string name="partner_no_status">No medicine status shared today.</string>
+    <string name="sharing_disabled_partner">Sharing is currently disabled by the medicine user.</string>
+
+    <!-- Sharing settings -->
+    <string name="sharing_settings_title">Sharing Settings</string>
+    <string name="connected_partner">Connected partner</string>
+    <string name="no_partner_connected">No partner connected</string>
+    <string name="sharing_enabled">Enable sharing</string>
+    <string name="sharing_enabled_desc">Allow your care partner to see medicine status</string>
+    <string name="remove_partner">Remove Partner</string>
+    <string name="partner_removed">Partner removed</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="notification_permission">Notification permission</string>
+    <string name="alarm_permission">Exact alarm permission</string>
+    <string name="request_alarm_permission">Request alarm permission</string>
+    <string name="permission_granted">Granted</string>
+    <string name="permission_not_granted">Not granted</string>
+    <string name="permission_not_required">Not required on this device</string>
+    <string name="logout">Log Out</string>
+
     <!-- Main -->
     <string name="today">Today</string>
     <string name="add_medicine">Add Medicine</string>
+    <string name="add">Add</string>
     <string name="history">History</string>
-    <string name="empty_today">No medicines scheduled for today.\nTap Add Medicine to get started.</string>
+    <string name="empty_today">No medicines scheduled for today.\nTap Add to get started.</string>
+    <string name="greeting_user">Hello, %1$s!</string>
+    <string name="greeting_partner">Hello, %1$s!</string>
+    <string name="greeting_default">there</string>
+    <string name="today_progress">Today\'s progress</string>
+    <string name="progress_percent">%1$d%%</string>
 
     <!-- Add Medicine -->
     <string name="add_medicine_title">Add Medicine</string>

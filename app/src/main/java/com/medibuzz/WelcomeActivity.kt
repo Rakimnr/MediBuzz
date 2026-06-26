@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.medibuzz.databinding.ActivityWelcomeBinding
 
 /**
- * Welcome screen shown when the app first opens.
+ * Welcome screen — routes to login or main app.
  */
 class WelcomeActivity : AppCompatActivity() {
 
@@ -18,7 +18,12 @@ class WelcomeActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnGetStarted.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+
+        binding.btnLogin.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
     }

@@ -2,9 +2,8 @@ package com.medibuzz
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import android.view.animation.AlphaAnimation
 import androidx.recyclerview.widget.RecyclerView
-import com.medibuzz.data.ReminderStatus
 import com.medibuzz.data.ScheduleType
 import com.medibuzz.databinding.ItemMedicineCardBinding
 
@@ -18,7 +17,7 @@ class MedicineAdapter(
     inner class ViewHolder(private val binding: ItemMedicineCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: TodayMedicineItem) {
+        fun bind(item: TodayMedicineItem, position: Int) {
             binding.tvMedicineName.text = item.name
             binding.tvDoseNote.text = item.doseNote
             binding.tvTime.text = item.timeText
@@ -29,38 +28,13 @@ class MedicineAdapter(
                     binding.root.context.getString(R.string.schedule_every_other_day)
             }
 
-            val context = binding.root.context
-            val (statusText, statusColor, statusBg) = when (item.status) {
-                ReminderStatus.TAKEN -> Triple(
-                    context.getString(R.string.status_taken),
-                    R.color.status_taken,
-                    R.color.status_taken_bg
-                )
-                ReminderStatus.SNOOZED -> Triple(
-                    context.getString(R.string.status_snoozed),
-                    R.color.status_snoozed,
-                    R.color.status_snoozed_bg
-                )
-                ReminderStatus.SKIPPED -> Triple(
-                    context.getString(R.string.status_skipped),
-                    R.color.status_skipped,
-                    R.color.status_skipped_bg
-                )
-                ReminderStatus.MISSED -> Triple(
-                    context.getString(R.string.status_missed),
-                    R.color.status_missed,
-                    R.color.status_missed_bg
-                )
-                ReminderStatus.PENDING -> Triple(
-                    context.getString(R.string.status_pending),
-                    R.color.status_pending,
-                    R.color.status_pending_bg
-                )
-            }
+            StatusBadgeHelper.apply(binding.tvStatus, item.status)
 
-            binding.tvStatus.text = statusText
-            binding.tvStatus.setTextColor(ContextCompat.getColor(context, statusColor))
-            binding.tvStatus.setBackgroundColor(ContextCompat.getColor(context, statusBg))
+            // Card fade-in animation
+            val anim = AlphaAnimation(0f, 1f)
+            anim.duration = 300
+            anim.startOffset = position * 60L
+            binding.root.startAnimation(anim)
         }
     }
 
@@ -72,7 +46,7 @@ class MedicineAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(items[position], position)
     }
 
     override fun getItemCount() = items.size

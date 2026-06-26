@@ -2,10 +2,9 @@ package com.medibuzz.data
 
 import android.content.Context
 import com.medibuzz.AlarmHelper
+import com.medibuzz.ReminderSyncHelper
 
-/**
- * Single place for database operations used by activities and receivers.
- */
+
 class MedicineRepository(private val context: Context) {
 
     private val database = AppDatabase.getInstance(context)
@@ -25,9 +24,17 @@ class MedicineRepository(private val context: Context) {
 
     suspend fun getAllReminderLogs(): List<ReminderLog> = reminderLogDao.getAll()
 
-    suspend fun insertReminderLog(log: ReminderLog): Long = reminderLogDao.insert(log)
+    suspend fun insertReminderLog(log: ReminderLog): Long {
+        val id = reminderLogDao.insert(log)
+        val saved = log.copy(id = id)
+        ReminderSyncHelper.syncLog(context, saved)
+        return id
+    }
 
-    suspend fun updateReminderLog(log: ReminderLog) = reminderLogDao.update(log)
+    suspend fun updateReminderLog(log: ReminderLog) {
+        reminderLogDao.update(log)
+        ReminderSyncHelper.syncLog(context, log)
+    }
 
     suspend fun getReminderLogById(id: Long): ReminderLog? = reminderLogDao.getById(id)
 

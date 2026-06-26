@@ -2,7 +2,6 @@ package com.medibuzz
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.medibuzz.data.ReminderLog
 import com.medibuzz.data.ReminderStatus
@@ -31,37 +30,7 @@ class HistoryAdapter(
             )
 
             val context = binding.root.context
-            val (statusText, statusColor, statusBg) = when (log.status) {
-                ReminderStatus.TAKEN -> Triple(
-                    context.getString(R.string.status_taken),
-                    R.color.status_taken,
-                    R.color.status_taken_bg
-                )
-                ReminderStatus.SNOOZED -> Triple(
-                    context.getString(R.string.status_snoozed),
-                    R.color.status_snoozed,
-                    R.color.status_snoozed_bg
-                )
-                ReminderStatus.SKIPPED -> Triple(
-                    context.getString(R.string.status_skipped),
-                    R.color.status_skipped,
-                    R.color.status_skipped_bg
-                )
-                ReminderStatus.MISSED -> Triple(
-                    context.getString(R.string.status_missed),
-                    R.color.status_missed,
-                    R.color.status_missed_bg
-                )
-                ReminderStatus.PENDING -> Triple(
-                    context.getString(R.string.status_pending),
-                    R.color.status_pending,
-                    R.color.status_pending_bg
-                )
-            }
-
-            binding.tvStatus.text = statusText
-            binding.tvStatus.setTextColor(ContextCompat.getColor(context, statusColor))
-            binding.tvStatus.setBackgroundColor(ContextCompat.getColor(context, statusBg))
+            StatusBadgeHelper.apply(binding.tvStatus, log.status)
 
             if (log.confirmedTime != null) {
                 binding.tvConfirmedTime.text = context.getString(
