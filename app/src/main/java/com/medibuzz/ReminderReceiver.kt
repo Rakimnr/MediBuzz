@@ -9,13 +9,18 @@ import android.os.VibratorManager
 import com.medibuzz.data.MedicineRepository
 import com.medibuzz.data.ReminderLog
 import com.medibuzz.data.ReminderStatus
+import com.medibuzz.firebase.FirestoreSyncRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
  * Receives alarm broadcasts and shows reminder notifications.
- * Also handles repeat reminders when user hasn't responded.
+ * Also handles repeat reminders when user has not responded.
+ *
+ * Important fix:
+ * When a reminder becomes PENDING, this receiver syncs that PENDING status to
+ * Firestore's shared_status collection so the care partner dashboard can show it.
  */
 class ReminderReceiver : BroadcastReceiver() {
 
@@ -28,27 +33,38 @@ class ReminderReceiver : BroadcastReceiver() {
         if (medicineId == -1L || scheduledTime == -1L) return
 
         val pendingResult = goAsync()
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val repository = MedicineRepository(context)
                 val action = intent.action
 
                 if (action == Constants.ACTION_REPEAT_REMINDER) {
-                    // Repeat reminder — only show if still PENDING
                     val log = repository.getReminderLogById(logId)
                     if (log != null && log.status == ReminderStatus.PENDING) {
                         vibrate(context)
                         NotificationHelper.showReminderNotification(
-                            context, medicineId, medicineName, scheduledTime, log.id
+                            context,
+                            medicineId,
+                            medicineName,
+                            scheduledTime,
+                            log.id
                         )
                         AlarmHelper.scheduleRepeatReminder(
-                            context, medicineId, medicineName, scheduledTime, log.id
+                            context,
+                            medicineId,
+                            medicineName,
+                            scheduledTime,
+                            log.id
                         )
                     }
                 } else {
-                    // Main or snooze reminder alarm fired
                     val isSnooze = intent.getBooleanExtra("is_snooze", false)
-                    var log = repository.getReminderLogByMedicineAndTime(medicineId, scheduledTime)
+                    var log = repository.getReminderLogByMedicineAndTime(
+                        medicineId,
+                        scheduledTime
+                    )
+
                     if (log == null) {
                         val newLog = ReminderLog(
                             medicineId = medicineId,
@@ -59,19 +75,30 @@ class ReminderReceiver : BroadcastReceiver() {
                         val newId = repository.insertReminderLog(newLog)
                         log = newLog.copy(id = newId)
                     } else if (isSnooze) {
-                        // After snooze, reset to PENDING so user can respond again
-                        log = log.copy(status = ReminderStatus.PENDING, confirmedTime = null)
+                        log = log.copy(
+                            status = ReminderStatus.PENDING,
+                            confirmedTime = null
+                        )
                         repository.updateReminderLog(log)
                     }
 
-                    // Remind if PENDING (or was reset from snooze)
+                    syncSharedStatus(context, log)
+
                     if (log.status == ReminderStatus.PENDING) {
                         vibrate(context)
                         NotificationHelper.showReminderNotification(
-                            context, medicineId, medicineName, scheduledTime, log.id
+                            context,
+                            medicineId,
+                            medicineName,
+                            scheduledTime,
+                            log.id
                         )
                         AlarmHelper.scheduleRepeatReminder(
-                            context, medicineId, medicineName, scheduledTime, log.id
+                            context,
+                            medicineId,
+                            medicineName,
+                            scheduledTime,
+                            log.id
                         )
                     }
                 }
@@ -81,11 +108,20 @@ class ReminderReceiver : BroadcastReceiver() {
         }
     }
 
-  /**
+    private suspend fun syncSharedStatus(context: Context, log: ReminderLog) {
+        try {
+            FirestoreSyncRepository(context).syncReminderLogIfEnabled(log)
+        } catch (_: Exception) {
+            // Reminder notification should still appear even if Firebase sync fails.
+        }
+    }
+
+    /**
      * Vibrate the phone when a reminder appears.
      */
     private fun vibrate(context: Context) {
         val pattern = longArrayOf(0, 500, 200, 500, 200, 500)
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             val vibratorManager =
                 context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -94,6 +130,7 @@ class ReminderReceiver : BroadcastReceiver() {
         } else {
             @Suppress("DEPRECATION")
             val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
             } else {

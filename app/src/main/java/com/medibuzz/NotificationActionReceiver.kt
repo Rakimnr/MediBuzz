@@ -6,12 +6,18 @@ import android.content.Intent
 import com.medibuzz.data.MedicineRepository
 import com.medibuzz.data.ReminderLog
 import com.medibuzz.data.ReminderStatus
+import com.medibuzz.firebase.FirestoreSyncRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
  * Handles notification action button presses: Taken, Snooze, Skipped.
+ *
+ * Important fix:
+ * After updating the local Room reminder log, this receiver also syncs the same
+ * status into Firestore's shared_status collection so the care partner dashboard
+ * can see the change.
  */
 class NotificationActionReceiver : BroadcastReceiver() {
 
@@ -24,6 +30,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
         if (medicineId == -1L || scheduledTime == -1L) return
 
         val pendingResult = goAsync()
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val repository = MedicineRepository(context)
@@ -31,44 +38,73 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
                 when (intent.action) {
                     Constants.ACTION_TAKEN -> {
-                        updateLog(repository, logId, medicineId, scheduledTime, medicineName,
-                            ReminderStatus.TAKEN, now)
+                        val updatedLog = updateLog(
+                            repository = repository,
+                            logId = logId,
+                            medicineId = medicineId,
+                            scheduledTime = scheduledTime,
+                            medicineName = medicineName,
+                            status = ReminderStatus.TAKEN,
+                            confirmedTime = now
+                        )
+                        syncSharedStatus(context, updatedLog)
+
                         NotificationHelper.cancelNotification(context, medicineId)
                         AlarmHelper.cancelRepeatReminder(context, medicineId)
 
-                        // Schedule next regular dose
                         val medicine = repository.getMedicineById(medicineId)
                         if (medicine != null) {
                             val nextTime = AlarmHelper.calculateNextReminderAfterAction(
-                                medicine, scheduledTime
+                                medicine,
+                                scheduledTime
                             )
                             AlarmHelper.scheduleAlarmAt(context, medicine, nextTime)
                         }
                     }
 
                     Constants.ACTION_SNOOZE -> {
-                        updateLog(repository, logId, medicineId, scheduledTime, medicineName,
-                            ReminderStatus.SNOOZED, now)
+                        val updatedLog = updateLog(
+                            repository = repository,
+                            logId = logId,
+                            medicineId = medicineId,
+                            scheduledTime = scheduledTime,
+                            medicineName = medicineName,
+                            status = ReminderStatus.SNOOZED,
+                            confirmedTime = now
+                        )
+                        syncSharedStatus(context, updatedLog)
+
                         NotificationHelper.cancelNotification(context, medicineId)
                         AlarmHelper.cancelRepeatReminder(context, medicineId)
 
-                        // Schedule snooze alarm in 10 minutes
                         AlarmHelper.scheduleSnoozeAlarm(
-                            context, medicineId, medicineName, scheduledTime
+                            context,
+                            medicineId,
+                            medicineName,
+                            scheduledTime
                         )
                     }
 
                     Constants.ACTION_SKIPPED -> {
-                        updateLog(repository, logId, medicineId, scheduledTime, medicineName,
-                            ReminderStatus.SKIPPED, now)
+                        val updatedLog = updateLog(
+                            repository = repository,
+                            logId = logId,
+                            medicineId = medicineId,
+                            scheduledTime = scheduledTime,
+                            medicineName = medicineName,
+                            status = ReminderStatus.SKIPPED,
+                            confirmedTime = now
+                        )
+                        syncSharedStatus(context, updatedLog)
+
                         NotificationHelper.cancelNotification(context, medicineId)
                         AlarmHelper.cancelRepeatReminder(context, medicineId)
 
-                        // Schedule next regular dose
                         val medicine = repository.getMedicineById(medicineId)
                         if (medicine != null) {
                             val nextTime = AlarmHelper.calculateNextReminderAfterAction(
-                                medicine, scheduledTime
+                                medicine,
+                                scheduledTime
                             )
                             AlarmHelper.scheduleAlarmAt(context, medicine, nextTime)
                         }
@@ -88,27 +124,39 @@ class NotificationActionReceiver : BroadcastReceiver() {
         medicineName: String,
         status: ReminderStatus,
         confirmedTime: Long
-    ) {
+    ): ReminderLog {
         val existing = if (logId != -1L) {
             repository.getReminderLogById(logId)
         } else {
             repository.getReminderLogByMedicineAndTime(medicineId, scheduledTime)
         }
 
-        if (existing != null) {
-            repository.updateReminderLog(
-                existing.copy(status = status, confirmedTime = confirmedTime)
+        return if (existing != null) {
+            val updated = existing.copy(
+                status = status,
+                confirmedTime = confirmedTime
             )
+            repository.updateReminderLog(updated)
+            updated
         } else {
-            repository.insertReminderLog(
-                ReminderLog(
-                    medicineId = medicineId,
-                    medicineName = medicineName,
-                    scheduledTime = scheduledTime,
-                    status = status,
-                    confirmedTime = confirmedTime
-                )
+            val newLog = ReminderLog(
+                medicineId = medicineId,
+                medicineName = medicineName,
+                scheduledTime = scheduledTime,
+                status = status,
+                confirmedTime = confirmedTime
             )
+            val newId = repository.insertReminderLog(newLog)
+            newLog.copy(id = newId)
+        }
+    }
+
+    private suspend fun syncSharedStatus(context: Context, log: ReminderLog) {
+        try {
+            FirestoreSyncRepository(context).syncReminderLogIfEnabled(log)
+        } catch (_: Exception) {
+            // Keep notification actions working even if the device is offline
+            // or Firebase temporarily fails.
         }
     }
 }

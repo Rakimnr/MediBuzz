@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MediBuzz">
 
-        <!-- Welcome screen (launcher) -->
+        <!-- Welcome screen -->
         <activity
             android:name=".WelcomeActivity"
             android:exported="true">
@@ -28,14 +28,24 @@
             </intent-filter>
         </activity>
 
-        <!-- Auth -->
-        <activity android:name=".LoginActivity" android:exported="false" />
-        <activity android:name=".RegisterActivity" android:exported="false" />
-        <activity android:name=".ChooseRoleActivity" android:exported="false" />
-        <activity android:name=".PartnerConnectActivity" android:exported="false" />
+        <!-- Authentication and role flow -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChooseRoleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PartnerConnectActivity"
+            android:exported="false" />
 
-        <!-- Main app -->
-        <activity android:name=".MainActivity" android:exported="false" />
+        <!-- Main app screens -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
         <activity
             android:name=".AddMedicineActivity"
             android:exported="false"
@@ -65,7 +75,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- Notification action receiver -->
+        <!-- Notification action receiver: Taken, Snooze, Skipped -->
         <receiver
             android:name=".NotificationActionReceiver"
             android:exported="false">

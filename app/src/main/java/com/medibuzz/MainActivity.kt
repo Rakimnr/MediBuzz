@@ -16,6 +16,7 @@ import com.medibuzz.data.MedicineRepository
 import com.medibuzz.data.ReminderStatus
 import com.medibuzz.databinding.ActivityMainBinding
 import com.medibuzz.firebase.FirebaseAuthRepository
+import com.medibuzz.firebase.FirestoreSyncRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -29,12 +30,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var repository: MedicineRepository
     private lateinit var authRepository: FirebaseAuthRepository
+
     private val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
     private val dateFormat = SimpleDateFormat("EEEE, MMM d", Locale.getDefault())
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* handled silently */ }
+    ) {
+        // Permission result handled silently.
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         repository = MedicineRepository(this)
         authRepository = FirebaseAuthRepository(this)
+
         NotificationHelper.createNotificationChannel(this)
         requestNotificationPermissionIfNeeded()
 
@@ -69,29 +74,39 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadTodayMedicines()
+        syncPendingLogs()
     }
 
     private fun loadGreeting() {
         lifecycleScope.launch {
             val profile = authRepository.getUserProfile()
-            val name = profile?.displayName?.ifEmpty { null } ?: getString(R.string.greeting_default)
+            val name = profile?.displayName?.ifEmpty { null }
+                ?: getString(R.string.greeting_default)
             binding.tvGreeting.text = getString(R.string.greeting_user, name)
         }
     }
 
+    /**
+     * Sync existing local logs into shared_status.
+     * This is required because the care partner dashboard reads shared_status,
+     * not users/{uid}/reminderLogs.
+     */
     private fun syncPendingLogs() {
         lifecycleScope.launch {
             try {
                 val logs = repository.getAllReminderLogs()
-                ReminderSyncHelper.syncAllLogs(this@MainActivity, logs)
-            } catch (_: Exception) { }
+                FirestoreSyncRepository(this@MainActivity).syncAllPendingLogs(logs)
+            } catch (_: Exception) {
+                // Do not block the home screen if Firebase is offline/unavailable.
+            }
         }
     }
 
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.POST_NOTIFICATIONS
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -102,6 +117,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadTodayMedicines() {
         lifecycleScope.launch {
             val medicines = repository.getAllActiveMedicines()
+
             val todayStart = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
@@ -114,11 +130,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             val todayItems = medicines
-                .filter { AlarmHelper.isMedicineScheduledForDay(it, todayStart) }
+                .filter { medicine ->
+                    AlarmHelper.isMedicineScheduledForDay(medicine, todayStart)
+                }
                 .map { medicine ->
                     val scheduledTime = AlarmHelper.getScheduledTimeForDay(medicine, todayStart)
                     val log = repository.getReminderLogForMedicineOnDay(
-                        medicine.id, todayStart.timeInMillis, todayEnd.timeInMillis
+                        medicine.id,
+                        todayStart.timeInMillis,
+                        todayEnd.timeInMillis
                     )
                     val status = log?.status ?: ReminderStatus.PENDING
 
@@ -132,9 +152,8 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
                 .sortedBy { item ->
-                    medicines.find { it.id == item.medicineId }?.let {
-                        it.hour * 60 + it.minute
-                    } ?: 0
+                    medicines.find { it.id == item.medicineId }
+                        ?.let { it.hour * 60 + it.minute } ?: 0
                 }
 
             updateDashboard(todayItems)
@@ -149,10 +168,10 @@ class MainActivity : AppCompatActivity() {
                 binding.rvMedicines.visibility = View.VISIBLE
                 binding.layoutProgress.visibility = View.VISIBLE
                 binding.layoutSummary.visibility = View.VISIBLE
+
                 binding.rvMedicines.layoutManager = LinearLayoutManager(this@MainActivity)
                 binding.rvMedicines.adapter = MedicineAdapter(todayItems)
 
-                // Fade-in animation for dashboard
                 val anim = AlphaAnimation(0f, 1f)
                 anim.duration = 400
                 binding.layoutProgress.startAnimation(anim)
@@ -163,7 +182,9 @@ class MainActivity : AppCompatActivity() {
     private fun updateDashboard(items: List<TodayMedicineItem>) {
         val total = items.size
         val taken = items.count { it.status == ReminderStatus.TAKEN }
-        val pending = items.count { it.status == ReminderStatus.PENDING || it.status == ReminderStatus.SNOOZED }
+        val pending = items.count {
+            it.status == ReminderStatus.PENDING || it.status == ReminderStatus.SNOOZED
+        }
         val missed = items.count { it.status == ReminderStatus.MISSED }
         val skipped = items.count { it.status == ReminderStatus.SKIPPED }
 
