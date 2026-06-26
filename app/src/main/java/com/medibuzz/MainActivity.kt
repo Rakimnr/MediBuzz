@@ -75,6 +75,9 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         loadTodayMedicines()
         syncPendingLogs()
+        lifecycleScope.launch {
+            FirestoreSyncRepository(this@MainActivity).syncTodayScheduleIfEnabled()
+        }
     }
 
     private fun loadGreeting() {

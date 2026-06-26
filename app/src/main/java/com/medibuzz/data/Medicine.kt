@@ -1,12 +1,16 @@
 package com.medibuzz.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * A medicine the user wants to be reminded about.
  */
-@Entity(tableName = "medicines")
+@Entity(
+    tableName = "medicines",
+    indices = [Index(value = ["isActive", "hour", "minute"])]
+)
 data class Medicine(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

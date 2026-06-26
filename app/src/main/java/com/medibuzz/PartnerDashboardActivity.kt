@@ -25,6 +25,7 @@ class PartnerDashboardActivity : AppCompatActivity() {
     private lateinit var authRepository: FirebaseAuthRepository
     private lateinit var syncRepository: FirestoreSyncRepository
     private val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+    private var adapter: PartnerStatusAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,36 +61,49 @@ class PartnerDashboardActivity : AppCompatActivity() {
             val profile = authRepository.getUserProfile()
             binding.tvGreeting.text = getString(R.string.greeting_partner, profile?.displayName ?: "")
 
-            val link = PartnerRepository().getPartnerLinkForCarePartner(uid)
-            if (link == null) {
-                showNoConnection()
-                return@launch
-            }
+            try {
+                val link = PartnerRepository().getPartnerLinkForCarePartner(uid)
+                if (link == null) {
+                    showNoConnection()
+                    return@launch
+                }
+                
+                binding.btnReconnect.visibility = View.GONE
 
-            if (!link.sharingEnabled) {
-                binding.tvSharingDisabled.visibility = View.VISIBLE
-                binding.rvPartnerStatus.visibility = View.GONE
-                binding.layoutSummary.visibility = View.GONE
-                binding.tvEmptyState.visibility = View.VISIBLE
-                binding.tvEmptyState.text = getString(R.string.sharing_disabled_partner)
-                return@launch
-            }
+                if (!link.sharingEnabled) {
+                    binding.tvSharingDisabled.visibility = View.VISIBLE
+                    binding.rvPartnerStatus.visibility = View.GONE
+                    binding.layoutSummary.visibility = View.GONE
+                    binding.tvEmptyState.visibility = View.VISIBLE
+                    binding.tvEmptyState.text = getString(R.string.sharing_disabled_partner)
+                    return@launch
+                }
 
-            binding.tvSharingDisabled.visibility = View.GONE
+                binding.tvSharingDisabled.visibility = View.GONE
 
-            val statuses = syncRepository.getTodaySharedStatusesForPartner(uid)
-            if (statuses.isEmpty()) {
-                binding.rvPartnerStatus.visibility = View.GONE
-                binding.layoutSummary.visibility = View.GONE
-                binding.tvEmptyState.visibility = View.VISIBLE
-                binding.tvEmptyState.text = getString(R.string.partner_no_status)
-            } else {
-                binding.tvEmptyState.visibility = View.GONE
-                binding.rvPartnerStatus.visibility = View.VISIBLE
-                binding.layoutSummary.visibility = View.VISIBLE
-                updateSummary(statuses)
-                binding.rvPartnerStatus.layoutManager = LinearLayoutManager(this@PartnerDashboardActivity)
-                binding.rvPartnerStatus.adapter = PartnerStatusAdapter(statuses, timeFormat)
+                val statuses = syncRepository.getTodaySharedStatusesForPartner(uid)
+                if (statuses.isEmpty()) {
+                    binding.rvPartnerStatus.visibility = View.GONE
+                    binding.layoutSummary.visibility = View.GONE
+                    binding.tvEmptyState.visibility = View.VISIBLE
+                    binding.tvEmptyState.text = getString(R.string.partner_no_status)
+                } else {
+                    binding.tvEmptyState.visibility = View.GONE
+                    binding.rvPartnerStatus.visibility = View.VISIBLE
+                    binding.layoutSummary.visibility = View.VISIBLE
+                    updateSummary(statuses)
+                    
+                    if (adapter == null) {
+                        adapter = PartnerStatusAdapter(statuses, timeFormat)
+                        binding.rvPartnerStatus.layoutManager = LinearLayoutManager(this@PartnerDashboardActivity)
+                        binding.rvPartnerStatus.adapter = adapter
+                    } else {
+                        adapter?.updateItems(statuses)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("PartnerDashboard", "Failed to load dashboard data", e)
+                android.widget.Toast.makeText(this@PartnerDashboardActivity, "Failed to load dashboard", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }

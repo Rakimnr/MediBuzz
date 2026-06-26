@@ -5,5 +5,15 @@ package com.medibuzz.firebase
  */
 enum class UserRole {
     MEDICINE_USER,
-    CARE_PARTNER
+    CARE_PARTNER;
+
+    companion object {
+        fun safeValueOf(value: String?): UserRole {
+            return try {
+                if (value.isNullOrBlank()) MEDICINE_USER else valueOf(value)
+            } catch (e: IllegalArgumentException) {
+                MEDICINE_USER
+            }
+        }
+    }
 }

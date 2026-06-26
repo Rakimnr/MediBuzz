@@ -126,6 +126,7 @@ class AddMedicineActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repository.insertMedicine(medicine)
+            com.medibuzz.firebase.FirestoreSyncRepository(this@AddMedicineActivity).syncTodayScheduleIfEnabled()
             Toast.makeText(this@AddMedicineActivity, R.string.medicine_saved, Toast.LENGTH_SHORT).show()
             finish()
         }

@@ -53,7 +53,101 @@ class FirestoreSyncRepository(private val context: Context) {
      * Sync all pending local logs when app opens (catch up after offline).
      */
     suspend fun syncAllPendingLogs(logs: List<ReminderLog>) {
-        logs.forEach { syncReminderLogIfEnabled(it) }
+        if (logs.isEmpty()) return
+        val uid = auth.currentUser?.uid ?: return
+        val profile = authRepository.getUserProfile() ?: return
+        if (profile.role != UserRole.MEDICINE_USER) return
+        val partnerLink = partnerRepository.getPartnerLinkForMedicineUser(uid) ?: return
+        if (!partnerLink.sharingEnabled) return
+
+        val batch = firestore.batch()
+        val collection = firestore.collection(FirestoreCollections.SHARED_STATUS)
+        
+        logs.forEach { log ->
+            val docId = "${uid}_${log.medicineId}_${log.scheduledTime}"
+            val sharedStatus = SharedStatus(
+                id = docId,
+                medicineUserId = uid,
+                carePartnerId = partnerLink.carePartnerId,
+                medicineId = log.medicineId,
+                medicineName = log.medicineName,
+                scheduledTime = log.scheduledTime,
+                status = log.status,
+                confirmedTime = log.confirmedTime,
+                updatedAt = System.currentTimeMillis()
+            )
+            batch.set(collection.document(docId), sharedStatus.toMap())
+        }
+        
+        try {
+            batch.commit().await()
+        } catch (e: Exception) {
+            android.util.Log.e("FirestoreSyncRepo", "Failed to sync pending logs", e)
+        }
+    }
+
+    /**
+     * Sync today's active medicines as PENDING if they don't have a ReminderLog yet.
+     */
+    suspend fun syncTodayScheduleIfEnabled() {
+        val uid = auth.currentUser?.uid ?: return
+        val profile = authRepository.getUserProfile() ?: return
+        if (profile.role != UserRole.MEDICINE_USER) return
+        val partnerLink = partnerRepository.getPartnerLinkForMedicineUser(uid) ?: return
+        if (!partnerLink.sharingEnabled) return
+
+        val medicineRepository = com.medibuzz.data.MedicineRepository(context)
+        val medicines = medicineRepository.getAllActiveMedicines()
+
+        val todayStart = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val todayEnd = Calendar.getInstance().apply {
+            timeInMillis = todayStart.timeInMillis
+            add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        val batch = firestore.batch()
+        var batchCount = 0
+        val collection = firestore.collection(FirestoreCollections.SHARED_STATUS)
+
+        medicines.filter { com.medibuzz.AlarmHelper.isMedicineScheduledForDay(it, todayStart) }
+            .forEach { medicine ->
+                val scheduledTime = com.medibuzz.AlarmHelper.getScheduledTimeForDay(medicine, todayStart)
+                val log = medicineRepository.getReminderLogForMedicineOnDay(
+                    medicine.id,
+                    todayStart.timeInMillis,
+                    todayEnd.timeInMillis
+                )
+                val status = log?.status ?: ReminderStatus.PENDING
+                val confirmedTime = log?.confirmedTime
+
+                val docId = "${uid}_${medicine.id}_$scheduledTime"
+                val sharedStatus = SharedStatus(
+                    id = docId,
+                    medicineUserId = uid,
+                    carePartnerId = partnerLink.carePartnerId,
+                    medicineId = medicine.id,
+                    medicineName = medicine.name,
+                    scheduledTime = scheduledTime,
+                    status = status,
+                    confirmedTime = confirmedTime,
+                    updatedAt = System.currentTimeMillis()
+                )
+                batch.set(collection.document(docId), sharedStatus.toMap())
+                batchCount++
+            }
+
+        if (batchCount > 0) {
+            try {
+                batch.commit().await()
+            } catch (e: Exception) {
+                android.util.Log.e("FirestoreSyncRepo", "Failed to sync today schedule", e)
+            }
+        }
     }
 
     /**

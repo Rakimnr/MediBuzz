@@ -41,7 +41,13 @@ class PartnerConnectActivity : AppCompatActivity() {
             }
 
             when (profile.role) {
-                UserRole.MEDICINE_USER -> showMedicineUserUi(profile.partnerCode ?: "")
+                UserRole.MEDICINE_USER -> {
+                    var code = profile.partnerCode
+                    if (code.isNullOrBlank()) {
+                        code = authRepository.ensurePartnerCode()
+                    }
+                    showMedicineUserUi(code ?: "")
+                }
                 UserRole.CARE_PARTNER -> showCarePartnerUi()
             }
         }

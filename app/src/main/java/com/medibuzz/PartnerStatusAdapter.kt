@@ -13,9 +13,14 @@ import java.text.SimpleDateFormat
  * Adapter for care partner dashboard status cards.
  */
 class PartnerStatusAdapter(
-    private val items: List<SharedStatus>,
+    private var items: List<SharedStatus>,
     private val timeFormat: SimpleDateFormat
 ) : RecyclerView.Adapter<PartnerStatusAdapter.ViewHolder>() {
+
+    fun updateItems(newItems: List<SharedStatus>) {
+        this.items = newItems
+        notifyDataSetChanged()
+    }
 
     inner class ViewHolder(private val binding: ItemPartnerStatusCardBinding) :
         RecyclerView.ViewHolder(binding.root) {

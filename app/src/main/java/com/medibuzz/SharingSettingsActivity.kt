@@ -69,7 +69,11 @@ class SharingSettingsActivity : AppCompatActivity() {
         val link = currentLink ?: return
         lifecycleScope.launch {
             val result = partnerRepository.setSharingEnabled(link.id, enabled)
-            result.onFailure { e ->
+            result.onSuccess {
+                if (enabled) {
+                    com.medibuzz.firebase.FirestoreSyncRepository(this@SharingSettingsActivity).syncTodayScheduleIfEnabled()
+                }
+            }.onFailure { e ->
                 binding.switchSharing.isChecked = !enabled
                 Toast.makeText(this@SharingSettingsActivity, e.message, Toast.LENGTH_SHORT).show()
             }

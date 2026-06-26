@@ -1,12 +1,16 @@
 package com.medibuzz.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * Log entry for each reminder occurrence (scheduled dose).
  */
-@Entity(tableName = "reminder_logs")
+@Entity(
+    tableName = "reminder_logs",
+    indices = [Index(value = ["medicineId", "scheduledTime"])]
+)
 data class ReminderLog(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

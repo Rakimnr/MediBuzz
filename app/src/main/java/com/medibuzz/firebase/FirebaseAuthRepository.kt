@@ -42,7 +42,7 @@ class FirebaseAuthRepository(private val context: Context) {
             val uid = result.user?.uid ?: throw Exception("Registration failed")
 
             val partnerCode = if (role == UserRole.MEDICINE_USER) {
-                generateUniquePartnerCode()
+                generateUniquePartnerCode(uid)
             } else {
                 null
             }
@@ -104,16 +104,33 @@ class FirebaseAuthRepository(private val context: Context) {
         auth.signOut()
     }
 
-    private suspend fun generateUniquePartnerCode(): String {
+    suspend fun ensurePartnerCode(): String? {
+        val user = currentUser ?: return null
+        val profile = getUserProfile() ?: return null
+        if (profile.role != UserRole.MEDICINE_USER) return null
+        if (!profile.partnerCode.isNullOrBlank()) return profile.partnerCode
+        
+        val newCode = generateUniquePartnerCode(user.uid)
+        firestore.collection(FirestoreCollections.USERS).document(user.uid)
+            .update("partnerCode", newCode).await()
+        return newCode
+    }
+
+    private suspend fun generateUniquePartnerCode(uid: String): String {
         val chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+        val secureRandom = java.security.SecureRandom()
         repeat(10) {
-            val code = (1..8).map { chars.random() }.joinToString("")
-            val existing = firestore.collection(FirestoreCollections.USERS)
-                .whereEqualTo("partnerCode", code)
-                .get()
-                .await()
-            if (existing.isEmpty) return code
+            val code = (1..8).map { chars[secureRandom.nextInt(chars.length)] }.joinToString("")
+            val docRef = firestore.collection(FirestoreCollections.PARTNER_CODES).document(code)
+            val existing = docRef.get().await()
+            if (!existing.exists()) {
+                docRef.set(mapOf("medicineUserId" to uid, "createdAt" to System.currentTimeMillis())).await()
+                return code
+            }
         }
-        return currentUser?.uid?.take(8)?.uppercase() ?: "MEDIBUZZ"
+        val fallbackCode = "MB" + uid.take(6).uppercase()
+        val docRef = firestore.collection(FirestoreCollections.PARTNER_CODES).document(fallbackCode)
+        docRef.set(mapOf("medicineUserId" to uid, "createdAt" to System.currentTimeMillis())).await()
+        return fallbackCode
     }
 }

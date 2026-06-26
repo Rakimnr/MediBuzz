@@ -8,5 +8,15 @@ enum class ReminderStatus {
     TAKEN,
     SNOOZED,
     SKIPPED,
-    MISSED
+    MISSED;
+
+    companion object {
+        fun safeValueOf(value: String?): ReminderStatus {
+            return try {
+                if (value.isNullOrBlank()) PENDING else valueOf(value)
+            } catch (e: IllegalArgumentException) {
+                PENDING
+            }
+        }
+    }
 }

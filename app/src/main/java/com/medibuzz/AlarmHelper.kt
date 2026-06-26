@@ -9,14 +9,8 @@ import com.medibuzz.data.Medicine
 import com.medibuzz.data.ScheduleType
 import java.util.Calendar
 
-/**
- * Handles scheduling and calculating medicine reminder alarms.
- */
 object AlarmHelper {
 
-    /**
-     * Schedule the next reminder alarm for a medicine (first or upcoming dose).
-     */
     fun scheduleNextAlarm(context: Context, medicine: Medicine) {
         if (!medicine.isActive) return
 
@@ -24,9 +18,6 @@ object AlarmHelper {
         scheduleAlarmAt(context, medicine, triggerTime)
     }
 
-    /**
-     * Schedule an alarm at a specific trigger time.
-     */
     fun scheduleAlarmAt(context: Context, medicine: Medicine, triggerTime: Long) {
         if (!medicine.isActive) return
         if (triggerTime <= System.currentTimeMillis()) return

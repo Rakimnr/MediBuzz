@@ -14,14 +14,20 @@ class PartnerRepository {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     suspend fun findUserByPartnerCode(code: String): UserProfile? {
-        val snapshot = firestore.collection(FirestoreCollections.USERS)
-            .whereEqualTo("partnerCode", code.uppercase().trim())
-            .limit(1)
+        val doc = firestore.collection(FirestoreCollections.PARTNER_CODES)
+            .document(code.uppercase().trim())
             .get()
             .await()
-        if (snapshot.isEmpty) return null
-        val doc = snapshot.documents.first()
-        return UserProfile.fromMap(doc.data ?: emptyMap())
+        if (!doc.exists()) return null
+        
+        val medicineUserId = doc.getString("medicineUserId") ?: return null
+        val userDoc = firestore.collection(FirestoreCollections.USERS)
+            .document(medicineUserId)
+            .get()
+            .await()
+            
+        if (!userDoc.exists()) return null
+        return UserProfile.fromMap(userDoc.data ?: emptyMap())
     }
 
     /**
@@ -42,27 +48,35 @@ class PartnerRepository {
             return Result.failure(Exception("You cannot connect to yourself"))
         }
 
-        // Document ID = medicineUserId for simple security rules
         val docId = medicineUser.uid
-        val existing = getPartnerLinkForMedicineUser(docId)
-        if (existing != null) {
-            return Result.success(existing)
+        val docRef = firestore.collection(FirestoreCollections.PARTNER_LINKS).document(docId)
+
+        return try {
+            val link = firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(docRef)
+                if (snapshot.exists()) {
+                    val existingId = snapshot.getString("carePartnerId")
+                    if (existingId == carePartnerId) {
+                        return@runTransaction PartnerLink.fromMap(docId, snapshot.data ?: emptyMap())
+                    } else {
+                        throw Exception("This medicine user is already connected to another care partner.")
+                    }
+                } else {
+                    val newLink = PartnerLink(
+                        id = docId,
+                        medicineUserId = medicineUser.uid,
+                        carePartnerId = carePartnerId,
+                        sharingEnabled = false,
+                        createdAt = System.currentTimeMillis()
+                    )
+                    transaction.set(docRef, newLink.toMap())
+                    return@runTransaction newLink
+                }
+            }.await()
+            Result.success(link)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-
-        val link = PartnerLink(
-            id = docId,
-            medicineUserId = medicineUser.uid,
-            carePartnerId = carePartnerId,
-            sharingEnabled = false,
-            createdAt = System.currentTimeMillis()
-        )
-
-        firestore.collection(FirestoreCollections.PARTNER_LINKS)
-            .document(docId)
-            .set(link.toMap())
-            .await()
-
-        return Result.success(link)
     }
 
     suspend fun getPartnerLinkForMedicineUser(medicineUserId: String): PartnerLink? {
