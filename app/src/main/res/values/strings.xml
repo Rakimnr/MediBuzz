@@ -115,4 +115,6 @@
     <string name="action_taken">Taken</string>
     <string name="action_snooze">Snooze 10 min</string>
     <string name="action_skipped">Skipped</string>
+    <string name="notif_title">Medicine Reminder</string>
+    <string name="notif_body">It\'s time to take your medication</string>
 </resources>

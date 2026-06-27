@@ -3,9 +3,6 @@ package com.medibuzz
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 
-/**
- * Shared preferences for app settings (dark mode, etc.).
- */
 object MediBuzzPrefs {
 
     private const val PREFS_NAME = "medibuzz_prefs"

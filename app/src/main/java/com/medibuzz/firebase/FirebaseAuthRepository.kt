@@ -122,9 +122,16 @@ class FirebaseAuthRepository(private val context: Context) {
         repeat(10) {
             val code = (1..8).map { chars[secureRandom.nextInt(chars.length)] }.joinToString("")
             val docRef = firestore.collection(FirestoreCollections.PARTNER_CODES).document(code)
-            val existing = docRef.get().await()
-            if (!existing.exists()) {
-                docRef.set(mapOf("medicineUserId" to uid, "createdAt" to System.currentTimeMillis())).await()
+            val existing = firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(docRef)
+                if (!snapshot.exists()) {
+                    transaction.set(docRef, mapOf("medicineUserId" to uid, "createdAt" to System.currentTimeMillis()))
+                    false // not existing
+                } else {
+                    true // existing
+                }
+            }.await()
+            if (!existing) {
                 return code
             }
         }

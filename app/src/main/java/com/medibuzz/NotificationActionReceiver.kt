@@ -11,14 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-/**
- * Handles notification action button presses: Taken, Snooze, Skipped.
- *
- * Important fix:
- * After updating the local Room reminder log, this receiver also syncs the same
- * status into Firestore's shared_status collection so the care partner dashboard
- * can see the change.
- */
 class NotificationActionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {

@@ -15,11 +15,10 @@ import androidx.lifecycle.lifecycleScope
 import com.medibuzz.databinding.ActivitySettingsBinding
 import com.medibuzz.firebase.FirebaseAuthRepository
 import com.medibuzz.firebase.UserRole
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.medibuzz.data.AppDatabase
 
-/**
- * App settings: dark mode, permissions, sharing, logout.
- */
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
@@ -102,6 +101,11 @@ class SettingsActivity : AppCompatActivity() {
         authRepository.logout()
         Toast.makeText(this, R.string.logged_out, Toast.LENGTH_SHORT).show()
         startActivity(Intent(this, LoginActivity::class.java))
+        // Run this before finishAffinity()
+        lifecycleScope.launch(Dispatchers.IO) {
+            AppDatabase.getDatabase(this@SettingsActivity).clearAllTables()
+            // Optional: Call your AlarmHelper to cancel all active intents here
+        }
         finishAffinity()
     }
 }

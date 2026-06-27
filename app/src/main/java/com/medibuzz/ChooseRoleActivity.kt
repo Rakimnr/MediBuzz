@@ -7,10 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.medibuzz.databinding.ActivityChooseRoleBinding
 import com.medibuzz.firebase.UserRole
 
-/**
- * Lets the user choose Medicine User or Care Partner role.
- * Returns the selected role via ActivityResult.
- */
 class ChooseRoleActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChooseRoleBinding

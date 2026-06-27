@@ -46,7 +46,8 @@ class FirestoreSyncRepository(private val context: Context) {
         firestore.collection(FirestoreCollections.SHARED_STATUS)
             .document(docId)
             .set(sharedStatus.toMap())
-            .await()
+            .addOnSuccessListener { /* Synced later */ }
+            .addOnFailureListener { /* Handle error silently */ }
     }
 
     /**

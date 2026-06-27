@@ -1,8 +1,5 @@
 package com.medibuzz
 
-/**
- * Shared constants used across alarms, notifications, and intents.
- */
 object Constants {
 
     const val DATABASE_NAME = "medibuzz_database"
