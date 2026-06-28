@@ -27,6 +27,7 @@ class FirebaseAuthRepository(private val context: Context) {
                 Result.failure(Exception("User profile not found. Please register again."))
             }
         } catch (e: Exception) {
+            android.util.Log.e("AuthRepo", "Firebase Auth Error", e)
             Result.failure(e)
         }
     }
@@ -63,6 +64,7 @@ class FirebaseAuthRepository(private val context: Context) {
 
             Result.success(profile)
         } catch (e: Exception) {
+            android.util.Log.e("AuthRepo", "Firebase Auth Error", e)
             Result.failure(e)
         }
     }
@@ -80,6 +82,7 @@ class FirebaseAuthRepository(private val context: Context) {
                 null
             }
         } catch (e: Exception) {
+            android.util.Log.e("AuthRepo", "Firebase Auth Error", e)
             null
         }
     }
@@ -96,6 +99,7 @@ class FirebaseAuthRepository(private val context: Context) {
                 null
             }
         } catch (e: Exception) {
+            android.util.Log.e("AuthRepo", "Firebase Auth Error", e)
             null
         }
     }
@@ -117,6 +121,7 @@ class FirebaseAuthRepository(private val context: Context) {
     }
 
     private suspend fun generateUniquePartnerCode(uid: String): String {
+        @Suppress("SpellCheckingInspection")
         val chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
         val secureRandom = java.security.SecureRandom()
         repeat(10) {

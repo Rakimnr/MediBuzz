@@ -2,7 +2,6 @@ package com.medibuzz
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +21,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var authRepository: FirebaseAuthRepository
 
     private val chooseRoleLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val roleStr = result.data?.getStringExtra("role") ?: return@registerForActivityResult
             val role = UserRole.safeValueOf(roleStr)
             performRegistration(role)

@@ -9,9 +9,6 @@ import com.medibuzz.databinding.ItemPartnerStatusCardBinding
 import com.medibuzz.firebase.SharedStatus
 import java.text.SimpleDateFormat
 
-/**
- * Adapter for care partner dashboard status cards.
- */
 class PartnerStatusAdapter(
     private var items: List<SharedStatus>,
     private val timeFormat: SimpleDateFormat
@@ -19,7 +16,7 @@ class PartnerStatusAdapter(
 
     fun updateItems(newItems: List<SharedStatus>) {
         this.items = newItems
-        notifyDataSetChanged()
+        notifyItemInserted(items.size - 1)
     }
 
     inner class ViewHolder(private val binding: ItemPartnerStatusCardBinding) :

@@ -1,6 +1,5 @@
 package com.medibuzz
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -39,7 +38,7 @@ class ChooseRoleActivity : AppCompatActivity() {
         val intent = Intent().apply {
             putExtra("role", selectedRole.name)
         }
-        setResult(Activity.RESULT_OK, intent)
+        setResult(RESULT_OK, intent)
         finish()
     }
 }

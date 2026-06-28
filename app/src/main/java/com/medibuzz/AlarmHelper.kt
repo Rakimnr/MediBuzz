@@ -121,6 +121,7 @@ object AlarmHelper {
     /**
      * Cancel the main reminder alarm for a medicine.
      */
+    @Suppress("unused")
     fun cancelAlarm(context: Context, medicineId: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java).apply {
@@ -183,7 +184,7 @@ object AlarmHelper {
                     set(Calendar.MILLISECOND, 0)
                 }
 
-                var checkDay = if (candidate.timeInMillis > now.timeInMillis &&
+                val checkDay = if (candidate.timeInMillis > now.timeInMillis &&
                     !todayStart.before(startCal) &&
                     isEveryOtherDayMatch(startCal, todayStart)
                 ) {
@@ -196,7 +197,7 @@ object AlarmHelper {
                 }
 
                 // Search up to 365 days ahead for a valid every-other-day slot
-                for (i in 0 until 365) {
+                repeat(365) {
                     if (!checkDay.before(startCal) && isEveryOtherDayMatch(startCal, checkDay)) {
                         val result = Calendar.getInstance().apply {
                             timeInMillis = checkDay.timeInMillis

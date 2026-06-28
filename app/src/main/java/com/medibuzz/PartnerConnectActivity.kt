@@ -1,6 +1,5 @@
 package com.medibuzz
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -12,10 +11,6 @@ import com.medibuzz.firebase.PartnerRepository
 import com.medibuzz.firebase.UserRole
 import kotlinx.coroutines.launch
 
-/**
- * Medicine User: shows partner code for sharing.
- * Care Partner: enter partner code to connect.
- */
 class PartnerConnectActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPartnerConnectBinding

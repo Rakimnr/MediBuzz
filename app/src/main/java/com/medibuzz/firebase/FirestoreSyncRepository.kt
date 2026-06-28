@@ -22,6 +22,7 @@ class FirestoreSyncRepository(private val context: Context) {
      * Upload or update a reminder log to shared_status if sharing is enabled.
      */
     suspend fun syncReminderLogIfEnabled(log: ReminderLog) {
+        if (!isSharingEnabled()) return
         val uid = auth.currentUser?.uid ?: return
 
         val profile = authRepository.getUserProfile() ?: return
@@ -54,6 +55,7 @@ class FirestoreSyncRepository(private val context: Context) {
      * Sync all pending local logs when app opens (catch up after offline).
      */
     suspend fun syncAllPendingLogs(logs: List<ReminderLog>) {
+        if (!isSharingEnabled()) return
         if (logs.isEmpty()) return
         val uid = auth.currentUser?.uid ?: return
         val profile = authRepository.getUserProfile() ?: return
@@ -91,6 +93,7 @@ class FirestoreSyncRepository(private val context: Context) {
      * Sync today's active medicines as PENDING if they don't have a ReminderLog yet.
      */
     suspend fun syncTodayScheduleIfEnabled() {
+        if (!isSharingEnabled()) return
         val uid = auth.currentUser?.uid ?: return
         val profile = authRepository.getUserProfile() ?: return
         if (profile.role != UserRole.MEDICINE_USER) return
